@@ -37,15 +37,24 @@ func GetRouter(content embed.FS) *gin.Engine {
 	//api
 	apiGroup := r.Group("/api")
 
+	//获取节点信息
 	apiGroup.GET("/peer", func(c *gin.Context) {
-
 		data, err := Service.GetPeer()
 		if err != nil {
 			c.JSON(http.StatusOK, Tools.GetFailMsg(err.Error()))
 			return
 		}
-
 		c.JSON(http.StatusOK, Tools.GetSuccMsg(len(data), data))
+	})
+
+	//获取当前设备信息
+	apiGroup.GET("/node", func(c *gin.Context) {
+		data, err := Service.GetNode()
+		if err != nil {
+			c.JSON(http.StatusOK, Tools.GetFailMsg(err.Error()))
+			return
+		}
+		c.JSON(http.StatusOK, Tools.GetSuccMsg(1, data))
 
 	})
 

@@ -1,12 +1,14 @@
 package Tools
 
 import (
+	"EasyWeb/Model"
 	"encoding/json"
 	"fmt"
 	"strings"
 )
 
-func ParseTableToJSON(tableStr string) (string, error) {
+// ParsePeerTableToJSON 节点解析
+func ParsePeerTableToJSON(tableStr string) (string, error) {
 	// 按行分割
 	lines := strings.Split(strings.TrimSpace(tableStr), "\n")
 	if len(lines) < 3 {
@@ -61,4 +63,52 @@ func ParseTableToJSON(tableStr string) (string, error) {
 		return "", fmt.Errorf("failed to marshal JSON: %v", err)
 	}
 	return string(jsonData), nil
+}
+
+// ParseNodeToModel  node节点解析
+func ParseNodeToModel(output string) (Model.Node, error) {
+	var node Model.Node
+	node.Listeners = []string{} // 初始化 Listeners 切片
+	lines := strings.Split(output, "\n")
+
+	for _, line := range lines {
+		// 跳过分隔线和空行
+		if !strings.Contains(line, "│") || strings.Contains(line, "────") {
+			continue
+		}
+
+		// 分割字段
+		fields := strings.Split(line, "│")
+		if len(fields) < 3 {
+			continue
+		}
+
+		// 清理键和值
+		key := strings.TrimSpace(fields[1])
+		value := strings.TrimSpace(fields[2])
+
+		// 根据键分配值
+		switch {
+		case key == "Virtual IP":
+			node.VirtualIP = value
+		case key == "Hostname":
+			node.Hostname = value
+		case key == "Proxy CIDRs":
+			node.ProxyCIDRs = value
+		case key == "Peer ID":
+			node.PeerID = value
+		case key == "Public IPv4":
+			node.PublicIPv4 = value
+		case key == "UDP Stun Type":
+			node.UDPStunType = value
+		case key == "Interface IPv4":
+			node.InterfaceIPv4 = value
+		case key == "Interface IPv6":
+			node.InterfaceIPv6 = value
+		case strings.HasPrefix(key, "Listener"): // 动态处理所有 Listener
+			node.Listeners = append(node.Listeners, value)
+		}
+	}
+
+	return node, nil
 }

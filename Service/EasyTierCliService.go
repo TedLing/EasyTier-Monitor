@@ -18,7 +18,7 @@ func GetPeer() ([]Model.Peer, error) {
 	}
 
 	// 解析表格并转换为 JSON
-	jsonOutput, err := Tools.ParseTableToJSON(res)
+	jsonOutput, err := Tools.ParsePeerTableToJSON(res)
 	if err != nil {
 		fmt.Println("解析返回数据失败：", err)
 		return nil, err
@@ -32,5 +32,25 @@ func GetPeer() ([]Model.Peer, error) {
 	}
 
 	return rows, nil
+
+}
+
+// GetNode 获取当前节点信息
+func GetNode() (Model.Node, error) {
+
+	res, err := Tools.RunCmd(Tools.CliPath, "node")
+	if err != nil {
+		fmt.Println("执行cmd命令失败：", err)
+		return Model.Node{}, err
+	}
+
+	// 解析表格并转换为 JSON
+	nodeinfo, err := Tools.ParseNodeToModel(res)
+	if err != nil {
+		fmt.Println("解析返回数据失败：", err)
+		return Model.Node{}, err
+	}
+
+	return nodeinfo, nil
 
 }

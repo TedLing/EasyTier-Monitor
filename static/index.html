@@ -17,14 +17,104 @@
 <div style="padding: 16px;">
 
     <div class="layui-form" style="width: 1350px">
+
+
+        <!--        按钮控件-->
         <div class="layui-form-item">
             <label class="layui-form-label">自动刷新</label>
             <div class="layui-input-block">
                 <input type="checkbox" name="autoFlush" lay-filter="autoFlush" title="开启|关闭"
-                lay-skin="switch">
+                       lay-skin="switch">
+            </div>
+        </div>
+
+
+
+
+        <div class="layui-collapse">
+            <div class="layui-colla-item">
+                <div class="layui-colla-title">当前节点信息</div>
+                <div class="layui-colla-content">
+                    <div class="layui-form-item">
+
+
+                        <div class="layui-row">
+                            <div class="layui-col-xs6">
+                                <label class="layui-form-label">虚拟IP地址</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="virtual_ip" id="virtual_ip" autocomplete="off"
+                                           class="layui-input" readonly>
+                                </div>
+                            </div>
+                            <div class="layui-col-xs6">
+                                <label class="layui-form-label">主机名</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="hostname" id="hostname" autocomplete="off"
+                                           class="layui-input" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="layui-row">
+                            <div class="layui-col-xs6">
+                                <label class="layui-form-label">子网代理</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="proxy_cidrs" id="proxy_cidrs" autocomplete="off"
+                                           class="layui-input" readonly>
+                                </div>
+                            </div>
+
+                            <div class="layui-col-xs6">
+                                <label class="layui-form-label">公网IP</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="public_ipv4" id="public_ipv4" autocomplete="off"
+                                           class="layui-input" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="layui-row">
+                            <div class="layui-col-xs6">
+                                <label class="layui-form-label">Nat类型</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="udp_stun_type" id="udp_stun_type" autocomplete="off"
+                                           class="layui-input" readonly>
+                                </div>
+                            </div>
+
+                            <div class="layui-col-xs6">
+                                <label class="layui-form-label">IPv4地址</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="interface_ipv4" id="interface_ipv4" autocomplete="off"
+                                           class="layui-input" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="layui-row">
+                            <div class="layui-col-xs6">
+                                <label class="layui-form-label">IPv6地址</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="interface_ipv6" id="interface_ipv6" autocomplete="off"
+                                           class="layui-input" readonly>
+                                </div>
+                            </div>
+
+                            <div class="layui-col-xs6">
+                                <label class="layui-form-label">监听地址</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="listeners" id="listeners" autocomplete="off"
+                                           class="layui-input" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
 
     <table class="layui-hide" id="peerList" lay-filter="devlist"></table>
 </div>
@@ -34,11 +124,49 @@
 
 
 <script>
+
+
+    //获取node节点
+    function getNode() {
+
+        // 发起 AJAX 请求获取后台数据
+        layui.$.ajax({
+            url: '../api/node', // 替换为你的后台接口地址
+            method: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.code === 0 && response.data) {
+                    const data = response.data;
+
+                    // 赋值到表单元素
+                    layui.$('#virtual_ip').val(data.virtual_ip);
+                    layui.$('#hostname').val(data.hostname);
+                    layui.$('#proxy_cidrs').val(data.proxy_cidrs);
+                    layui.$('#peer_id').val(data.peer_id);
+                    layui.$('#public_ipv4').val(data.public_ipv4);
+                    layui.$('#udp_stun_type').val(data.udp_stun_type);
+                    layui.$('#interface_ipv4').val(data.interface_ipv4);
+                    layui.$('#interface_ipv6').val(data.interface_ipv6);
+                    layui.$('#listeners').val(data.listeners);
+                    layui.form.render();
+                } else {
+                    layer.msg('数据加载失败: ' + response.msg, {icon: 2});
+                }
+            },
+            error: function () {
+                layer.msg('请求失败，请检查网络或接口', {icon: 2});
+            }
+        })
+    }
+
+
     layui.use(['table', 'layer', 'form'], function () {
 
         const table = layui.table;
         const form = layui.form;
-        const $ = layui.$;
+
+        //调用一下
+        getNode();
 
 
         // 渲染table 窗口
@@ -47,8 +175,6 @@
             url: '../api/peer', // 此处为静态模拟数据，实际使用时需换成真实接口
             toolbar: '#toolbarheader',
             defaultToolbar: ['filter', 'exports'],
-            //height: 'full-35', // 最大高度减去其他容器已占有的高度差
-            //width: 1350,
             css: [ // 重设当前表格样式
                 '.layui-table-tool-temp{padding-right: 145px;}'
             ].join(''),
@@ -56,7 +182,7 @@
             totalRow: true, // 开启合计行
             page: false,
             cols: [[
-                {field: 'id', title: '设备ID', align: "center"},
+                {field: 'id', title: '节点ID', align: "center"},
                 {field: 'ipv4', title: '虚拟IPv4', sort: true, align: "center"},
                 {field: 'hostname', title: '主机名', align: "center"},
                 {field: 'cost', title: '穿透方式', align: "center"},
@@ -77,8 +203,6 @@
         });
 
 
-
-
         // 定时刷新 表格的数据
         let refreshTimer = null;
         form.on('switch(autoFlush)', function (obj) {
@@ -87,6 +211,10 @@
             if (isChecked) {
                 // Start the timer to refresh the table every 5 seconds
                 refreshTimer = setInterval(function () {
+                    //刷新当前节点信息
+                    getNode();
+
+                    //刷新其他节点信息
                     table.reloadData('peerList', {
                         scrollPos: true,
                         where: {} // Optional: pass additional query parameters if needed
@@ -102,8 +230,6 @@
                 }
             }
         });
-
-
 
 
     });

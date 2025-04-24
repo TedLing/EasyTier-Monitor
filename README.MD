@@ -35,11 +35,11 @@ WantedBy=multi-user.target
 
 
 ## 界面截图
-![img.png](img.png)
+![img_1.png](img_1.png)
 
 ## 功能点
  - [x] Peer节点查看
-
+ - [x] 当前节点信息查看
 
 
 ## 技术框架
