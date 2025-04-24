@@ -1,4 +1,4 @@
-module EasyWeb
+module EasyTier-Monitor
 
 go 1.23.1
 

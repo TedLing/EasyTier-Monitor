@@ -1,7 +1,7 @@
 package Tools
 
 import (
-	"EasyWeb/Model"
+	"EasyTier-Monitor/Model"
 	"encoding/json"
 	"fmt"
 	"regexp"

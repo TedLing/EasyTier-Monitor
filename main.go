@@ -1,8 +1,8 @@
 package main
 
 import (
-	"EasyWeb/Router"
-	"EasyWeb/Tools"
+	"EasyTier-Monitor/Router"
+	"EasyTier-Monitor/Tools"
 	"embed"
 	"fmt"
 	"strconv"
@@ -60,7 +60,7 @@ func init() {
 
 	config := viper.New()
 	config.AddConfigPath("./")
-	config.SetConfigName("EasyWeb")
+	config.SetConfigName("EasyTier-Monitor")
 	config.SetConfigType("json")
 
 	if err := config.ReadInConfig(); err != nil {

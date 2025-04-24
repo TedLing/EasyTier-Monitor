@@ -10,8 +10,8 @@ HELP.md
 *.ipr
 
 ##编译出来的文件
-/EasyWeb
-/EasyWeb.exe
+/EasyTier-Monitor
+/EasyTier-Monitor.exe
 
 
 ### VS Code ###

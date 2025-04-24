@@ -1,19 +1,13 @@
 package router
 
 import (
-	"EasyWeb/Service"
-	"EasyWeb/Tools"
-	_ "EasyWeb/Tools"
+	"EasyTier-Monitor/Service"
+	"EasyTier-Monitor/Tools"
 	"embed"
-	_ "encoding/json"
-	_ "fmt"
+	"github.com/gin-gonic/gin"
 	"html/template"
 	"io/fs"
-	_ "net"
 	"net/http"
-	_ "strings"
-
-	"github.com/gin-gonic/gin"
 )
 
 func GetRouter(content embed.FS) *gin.Engine {

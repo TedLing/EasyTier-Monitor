@@ -1,8 +1,8 @@
 package Service
 
 import (
-	"EasyWeb/Model"
-	"EasyWeb/Tools"
+	"EasyTier-Monitor/Model"
+	"EasyTier-Monitor/Tools"
 	"encoding/json"
 	"fmt"
 )
