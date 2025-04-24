@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <title>EasyTier节点查看</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="../static/img/easytier.png" type="image/x-icon"/>
+    <link href="../static/layui/css/layui.css" rel="stylesheet">
+</head>
+
+<body>
+
+
+<div style="padding: 16px;">
+
+    <div class="layui-form" style="width: 1350px">
+        <div class="layui-form-item">
+            <label class="layui-form-label">自动刷新</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="autoFlush" lay-filter="autoFlush" title="开启|关闭"
+                lay-skin="switch">
+            </div>
+        </div>
+    </div>
+
+    <table class="layui-hide" id="peerList" lay-filter="devlist"></table>
+</div>
+
+
+<script src="../static/layui/layui.js"></script>
+
+
+<script>
+    layui.use(['table', 'layer', 'form'], function () {
+
+        const table = layui.table;
+        const form = layui.form;
+        const $ = layui.$;
+
+
+        // 渲染table 窗口
+        table.render({
+            elem: '#peerList',
+            url: '../api/peer', // 此处为静态模拟数据，实际使用时需换成真实接口
+            toolbar: '#toolbarheader',
+            defaultToolbar: ['filter', 'exports'],
+            //height: 'full-35', // 最大高度减去其他容器已占有的高度差
+            //width: 1350,
+            css: [ // 重设当前表格样式
+                '.layui-table-tool-temp{padding-right: 145px;}'
+            ].join(''),
+            cellMinWidth: 80,
+            totalRow: true, // 开启合计行
+            page: false,
+            cols: [[
+                {field: 'id', title: '设备ID', align: "center"},
+                {field: 'ipv4', title: '虚拟IPv4', sort: true, align: "center"},
+                {field: 'hostname', title: '主机名', align: "center"},
+                {field: 'cost', title: '穿透方式', align: "center"},
+                {field: 'lat_ms', title: '延迟', align: "center"},
+                {field: 'loss_rate', title: '丢包率', align: "center"},
+                {field: 'rx_bytes', title: '接收', align: "center"},
+                {field: 'tx_bytes', title: '发送', align: "center"},
+                {field: 'tunnel_proto', title: '协议类型', align: "center"},
+                {field: 'nat_type', title: 'Nat类型', align: "center"},
+                {field: 'version', title: '内核版本', align: "center"}
+            ]],
+            done: function () {
+            },
+            error: function (res, msg) {
+                layui.alert("加载数据失败:" + msg)
+                console.log(res, msg)
+            }
+        });
+
+
+
+
+        // 定时刷新 表格的数据
+        let refreshTimer = null;
+        form.on('switch(autoFlush)', function (obj) {
+            const isChecked = obj.elem.checked; // Get the checkbox state (true = checked, false = unchecked)
+            console.log('开关触发，状态：' + (isChecked ? '开启' : '关闭')); // 调试日志
+            if (isChecked) {
+                // Start the timer to refresh the table every 5 seconds
+                refreshTimer = setInterval(function () {
+                    table.reloadData('peerList', {
+                        scrollPos: true,
+                        where: {} // Optional: pass additional query parameters if needed
+                    });
+                    console.log('Peer刷新于 => ' + new Date().toLocaleTimeString());
+                }, 5000); // 5000ms = 5 seconds
+            } else {
+                // Clear the timer when the switch is turned off
+                if (refreshTimer) {
+                    clearInterval(refreshTimer);
+                    refreshTimer = null;
+                    console.log('Peer刷新停止');
+                }
+            }
+        });
+
+
+
+
+    });
+</script>
+</body>
+
+</html>
