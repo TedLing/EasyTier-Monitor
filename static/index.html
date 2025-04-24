@@ -113,6 +113,13 @@
             </div>
 
 
+            <div class="layui-colla-item">
+                <div class="layui-colla-title">服务器连接情况</div>
+                <div class="layui-colla-content">
+                    <table class="layui-hide" id="connector" lay-filter="connector"></table>
+                </div>
+            </div>
+
             <!--        添加一个表格-->
             <div class="layui-colla-item">
                 <div class="layui-colla-title">全部节点信息</div>
@@ -181,6 +188,30 @@
         getNode();
 
 
+        // 渲染 table1 窗口
+        table.render({
+            elem: '#connector',
+            url: '../api/connector',
+            defaultToolbar: ['filter', 'exports'],
+            title: '服务器连接情况',
+            even: true,
+            skin: 'row',
+            cellMinWidth: 80,
+            totalRow: false, // 开启合计行
+            page: false,
+            cols: [[
+                {field: 'url', title: '服务器地址', align: "center"},
+                {field: 'status', title: '连接情况', sort: true, align: "center"}
+            ]],
+            done: function () {
+            },
+            error: function (res, msg) {
+                layui.alert("加载数据失败:" + msg)
+                console.log(res, msg)
+            }
+        });
+
+
         // 渲染table 窗口
         table.render({
             elem: '#peerList',
@@ -241,14 +272,21 @@
                         scrollPos: true,
                         where: {} // Optional: pass additional query parameters if needed
                     });
-                    console.log('Peer刷新于 => ' + new Date().toLocaleTimeString());
+
+                    //刷新服务器连接情况
+                    table.reloadData('connector', {
+                        scrollPos: true,
+                        where: {} // Optional: pass additional query parameters if needed
+                    });
+
+                    console.log('自动刷新 => ' + new Date().toLocaleTimeString());
                 }, 5000); // 5000ms = 5 seconds
             } else {
                 // Clear the timer when the switch is turned off
                 if (refreshTimer) {
                     clearInterval(refreshTimer);
                     refreshTimer = null;
-                    console.log('Peer刷新停止');
+                    console.log('自动刷新停止');
                 }
             }
         });

@@ -35,13 +35,13 @@ WantedBy=multi-user.target
 
 
 ## 界面截图
-![img.png](img.png)
+![img_1.png](img_1.png)
 
 ## 功能点
  - [x] Peer节点查看
  - [x] 当前节点信息查看
- - [x] 添加按钮跳转官方配置工具
- - [ ] 连接服务节点状态查看
+ - [x] 点击按钮跳转官方配置工具
+ - [x] 连接服务节点状态查看
 
 ## 技术框架
  后端： golang  前端：layui

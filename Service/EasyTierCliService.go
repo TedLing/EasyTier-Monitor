@@ -54,3 +54,23 @@ func GetNode() (Model.Node, error) {
 	return nodeinfo, nil
 
 }
+
+// GetConnector 获取服务器连接信息
+func GetConnector() ([]Model.Connector, error) {
+
+	res, err := Tools.RunCmd(Tools.CliPath, "connector")
+	if err != nil {
+		fmt.Println("执行cmd命令失败：", err)
+		return nil, err
+	}
+
+	// 解析表格并转换为 JSON
+	ConnectorInfo, err := Tools.ParseConnectorToModel(res)
+	if err != nil {
+		fmt.Println("解析返回数据失败：", err)
+		return nil, err
+	}
+
+	return ConnectorInfo, nil
+
+}

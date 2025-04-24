@@ -58,8 +58,16 @@ func GetRouter(content embed.FS) *gin.Engine {
 
 	})
 
-	//dev -api
-	//devGroup := apiGroup.Group("/dev")
+	//获取服务器节点信息
+	apiGroup.GET("/connector", func(c *gin.Context) {
+		data, err := Service.GetConnector()
+		if err != nil {
+			c.JSON(http.StatusOK, Tools.GetFailMsg(err.Error()))
+			return
+		}
+		c.JSON(http.StatusOK, Tools.GetSuccMsg(1, data))
+
+	})
 
 	return r
 }
