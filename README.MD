@@ -35,7 +35,7 @@ WantedBy=multi-user.target
 
 
 ## 界面截图
-![img_1.png](img_1.png)
+![img_2.png](img_2.png)
 
 ## 功能点
  - [x] Peer节点查看
@@ -44,4 +44,4 @@ WantedBy=multi-user.target
  - [x] 连接服务节点状态查看
 
 ## 技术框架
- 后端： golang  前端：layui
+ 后端： golang-gin 前端：vue3-element-plus
