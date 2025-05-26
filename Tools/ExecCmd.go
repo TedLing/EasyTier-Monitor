@@ -5,12 +5,12 @@ import (
 	"os/exec"
 )
 
-func RunCmd(cmdStr string, params string) (string, error) {
+func RunCmd(cmdStr string, params ...string) (string, error) {
 
 	//为第一个参数 添加一个引号
 	//cmdStr = `"`+cmdStr+
 
-	cmd := exec.Command(cmdStr, params)
+	cmd := exec.Command(cmdStr, params...)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"EasyTier-Monitor/Router"
+	router "EasyTier-Monitor/Router"
 	"EasyTier-Monitor/Tools"
 	"embed"
 	"fmt"

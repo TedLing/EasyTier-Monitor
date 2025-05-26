@@ -4,7 +4,6 @@ import (
 	"EasyTier-Monitor/Model"
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"strings"
 )
 
@@ -116,42 +115,45 @@ func ParseNodeToModel(output string) (Model.Node, error) {
 
 // ParseConnectorToModel 获取连接的服务器节点
 func ParseConnectorToModel(output string) ([]Model.Connector, error) {
-	urlRegex := regexp.MustCompile(`url: "([^"]+)"`)
-	statusRegex := regexp.MustCompile(`status: (\w+),`)
 
-	// 存储提取的结果
-	var connectors []Model.Connector
+	//urlRegex := regexp.MustCompile(`url: "([^"]+)"`)
+	//statusRegex := regexp.MustCompile(`status: (\w+),`)
+	//
+	//// 存储提取的结果
+	//var connectors []Model.Connector
+	//
+	//// 按行分割字符串以处理每个 Connector
+	//lines := strings.Split(output, "\n")
+	//var currentUrl, currentStatus string
+	//for _, line := range lines {
+	//	line = strings.TrimSpace(line)
+	//
+	//	// 提取 url
+	//	urlMatches := urlRegex.FindStringSubmatch(line)
+	//	if len(urlMatches) > 1 {
+	//		currentUrl = urlMatches[1]
+	//	}
+	//
+	//	// 提取 status
+	//	statusMatches := statusRegex.FindStringSubmatch(line)
+	//	if len(statusMatches) > 1 {
+	//		currentStatus = statusMatches[1]
+	//	}
+	//
+	//	// 当找到一对 url 和 status 时，添加到结果
+	//	if currentUrl != "" && currentStatus != "" {
+	//		connectors = append(connectors, Model.Connector{
+	//			Url:    currentUrl,
+	//			Status: currentStatus,
+	//		})
+	//		// 重置以处理下一个 Connector
+	//		currentUrl = ""
+	//		currentStatus = ""
+	//	}
+	//}
 
-	// 按行分割字符串以处理每个 Connector
-	lines := strings.Split(output, "\n")
-	var currentUrl, currentStatus string
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
+	//return connectors, nil
 
-		// 提取 url
-		urlMatches := urlRegex.FindStringSubmatch(line)
-		if len(urlMatches) > 1 {
-			currentUrl = urlMatches[1]
-		}
-
-		// 提取 status
-		statusMatches := statusRegex.FindStringSubmatch(line)
-		if len(statusMatches) > 1 {
-			currentStatus = statusMatches[1]
-		}
-
-		// 当找到一对 url 和 status 时，添加到结果
-		if currentUrl != "" && currentStatus != "" {
-			connectors = append(connectors, Model.Connector{
-				Url:    currentUrl,
-				Status: currentStatus,
-			})
-			// 重置以处理下一个 Connector
-			currentUrl = ""
-			currentStatus = ""
-		}
-	}
-
-	return connectors, nil
+	return []Model.Connector{}, nil
 
 }
