@@ -4,16 +4,20 @@ import (
 	"EasyTier-Monitor/Service"
 	"EasyTier-Monitor/Tools"
 	"embed"
-	"github.com/gin-gonic/gin"
 	"html/template"
 	"io/fs"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetRouter(content embed.FS) *gin.Engine {
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+
+	// 添加自定义日志中间件
+	r.Use(Tools.GinLogger())
 
 	// 浏览界面处理
 	r.SetHTMLTemplate(template.Must(template.New("").ParseFS(content, "static/*.html")))
@@ -28,13 +32,13 @@ func GetRouter(content embed.FS) *gin.Engine {
 		context.HTML(http.StatusOK, "index.html", nil)
 	})
 
-	//api
+	//api - 添加认证中间件
 	apiGroup := r.Group("/api")
+	apiGroup.Use(Tools.AuthMiddleware())
 
 	//获取节点信息
 	apiGroup.GET("/peer", func(c *gin.Context) {
 		data, err := Service.GetPeerNew()
-		//data, err := Service.GetPeer()
 		if err != nil {
 			c.JSON(http.StatusOK, Tools.GetFailMsg(err.Error()))
 			return
@@ -44,26 +48,22 @@ func GetRouter(content embed.FS) *gin.Engine {
 
 	//获取当前设备信息
 	apiGroup.GET("/node", func(c *gin.Context) {
-		//data, err := Service.GetNode()
 		data, err := Service.GetNodeNew()
 		if err != nil {
 			c.JSON(http.StatusOK, Tools.GetFailMsg(err.Error()))
 			return
 		}
 		c.JSON(http.StatusOK, Tools.GetSuccMsg(1, data))
-
 	})
 
 	//获取服务器节点信息
 	apiGroup.GET("/connector", func(c *gin.Context) {
-		//data, err := Service.GetConnector()
 		data, err := Service.GetConnectorNew()
 		if err != nil {
 			c.JSON(http.StatusOK, Tools.GetFailMsg(err.Error()))
 			return
 		}
 		c.JSON(http.StatusOK, Tools.GetSuccMsg(1, data))
-
 	})
 
 	return r

@@ -1,0 +1,35 @@
+# EasyTier-Monitor 配置文件
+
+# 服务器配置
+server:
+  http_port: 8081      # HTTP服务监听端口
+  host: 0.0.0.0        # HTTP服务监听地址
+
+# CLI配置
+cli:
+  path: "C:/Program Files/easytier-manager-pro/resource/easytier-cli.exe"     # EasyTier CLI工具路径
+  timeout: 5           # 命令执行超时时间（秒）
+  max_retries: 3       # 命令执行失败最大重试次数
+
+# 缓存配置
+cache:
+  enabled: true        # 是否启用缓存
+  default_ttl: 10      # 默认缓存过期时间（秒）
+  peer_ttl: 10         # Peer信息缓存过期时间（秒）
+  node_ttl: 30         # Node信息缓存过期时间（秒）
+  connector_ttl: 30    # Connector信息缓存过期时间（秒）
+
+# 日志配置
+log:
+  level: "info"        # 日志级别：debug, info, warn, error
+  file: ""             # 日志文件路径（空表示标准输出）
+  max_size: 100        # 单个日志文件最大大小（MB）
+  max_age: 7           # 日志文件最大保留天数
+  max_backups: 3       # 日志文件最大保留个数
+  compress: false      # 是否压缩日志文件
+
+# 安全配置
+security:
+  enabled: false       # 是否启用API认证
+  api_key: ""          # API密钥（启用认证时必填）
+  allowed_ips: ""      # 允许访问的IP地址（逗号分隔，空表示允许所有）

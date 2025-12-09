@@ -10,47 +10,31 @@ import (
 )
 
 func GetPeerNew() ([]Model.Peer, error) {
-	//直接执行命令
-	res, err := Tools.RunCmd(Tools.CliPath, "-o", "json", "peer")
+	// 先从缓存获取数据
+	if cachedData, found := Tools.AppCache.Get(Tools.CacheKeyPeer); found {
+		if peerData, ok := cachedData.([]Model.Peer); ok {
+			Tools.AppLogger.Debug("从缓存获取Peer信息成功")
+			return peerData, nil
+		}
+	}
+
+	// 缓存不存在或已过期，执行命令获取新数据
+	res, err := Tools.RunCmd(Tools.AppConfig.CLI.Path, "-o", "json", "peer")
 	if err != nil {
-		fmt.Println("执行cmd命令失败：", err)
-		return nil, err
+		Tools.AppLogger.Error("执行peer命令失败: %v", err)
+		return nil, fmt.Errorf("获取peer信息失败: %w", err)
 	}
 
 	var rows []Model.Peer
 	err = json.Unmarshal([]byte(res), &rows)
 	if err != nil {
-		fmt.Println("解析json失败：", err)
-		return nil, err
+		Tools.AppLogger.Error("解析peer JSON数据失败: %v, 原始数据: %s", err, res)
+		return nil, fmt.Errorf("解析peer JSON数据失败: %w, 原始数据: %s", err, res)
 	}
 
-	return rows, nil
-
-}
-
-// GetPeer 获取客户端连接列表
-func GetPeer() ([]Model.Peer, error) {
-
-	//直接执行命令
-	res, err := Tools.RunCmd(Tools.CliPath, "peer")
-	if err != nil {
-		fmt.Println("执行cmd命令失败：", err)
-		return nil, err
-	}
-
-	// 解析表格并转换为 JSON
-	jsonOutput, err := Tools.ParsePeerTableToJSON(res)
-	if err != nil {
-		fmt.Println("解析返回数据失败：", err)
-		return nil, err
-	}
-
-	var rows []Model.Peer
-	err = json.Unmarshal([]byte(jsonOutput), &rows)
-	if err != nil {
-		fmt.Println("解析json失败：", err)
-		return nil, err
-	}
+	// 将新数据存入缓存
+	Tools.AppCache.Set(Tools.CacheKeyPeer, rows, Tools.GetCacheDuration(Tools.CacheKeyPeer))
+	Tools.AppLogger.Info("获取Peer信息成功，共 %d 条记录", len(rows))
 
 	return rows, nil
 
@@ -58,17 +42,26 @@ func GetPeer() ([]Model.Peer, error) {
 
 // GetNodeNew 新方式获取Node信息  直接返回JSON 目前支持 2.3.0
 func GetNodeNew() (Model.Node, error) {
+	// 先从缓存获取数据
+	if cachedData, found := Tools.AppCache.Get(Tools.CacheKeyNode); found {
+		if nodeData, ok := cachedData.(Model.Node); ok {
+			Tools.AppLogger.Debug("从缓存获取Node信息成功")
+			return nodeData, nil
+		}
+	}
 
-	res, err := Tools.RunCmd(Tools.CliPath, "-o", "json", "node")
+	// 缓存不存在或已过期，执行命令获取新数据
+	res, err := Tools.RunCmd(Tools.AppConfig.CLI.Path, "-o", "json", "node")
 	if err != nil {
-		fmt.Println("执行cmd命令失败：", err)
-		return Model.Node{}, err
+		Tools.AppLogger.Error("执行node命令失败: %v", err)
+		return Model.Node{}, fmt.Errorf("获取node信息失败: %w", err)
 	}
 
 	nodeNew := Model.NodeNew{}
 	err = json.Unmarshal([]byte(res), &nodeNew)
 	if err != nil {
-		return Model.Node{}, err
+		Tools.AppLogger.Error("解析node JSON数据失败: %v, 原始数据: %s", err, res)
+		return Model.Node{}, fmt.Errorf("解析node JSON数据失败: %w, 原始数据: %s", err, res)
 	}
 
 	//重新拼装处理 兼容前端逻辑
@@ -83,48 +76,39 @@ func GetNodeNew() (Model.Node, error) {
 	nodeInfo.InterfaceIPv6 = Tools.ToIPv6List(nodeNew.IPList.InterfaceIPv6s)
 	nodeInfo.Listeners = nodeNew.Listeners
 
+	// 将新数据存入缓存
+	Tools.AppCache.Set(Tools.CacheKeyNode, nodeInfo, Tools.GetCacheDuration(Tools.CacheKeyNode))
+	Tools.AppLogger.Info("获取Node信息成功")
+
 	return nodeInfo, nil
 }
 
-// GetNode 获取当前节点信息
-func GetNode() (Model.Node, error) {
-
-	res, err := Tools.RunCmd(Tools.CliPath, "node")
-	if err != nil {
-		fmt.Println("执行cmd命令失败：", err)
-		return Model.Node{}, err
-	}
-
-	// 解析表格并转换为 JSON
-	nodeinfo, err := Tools.ParseNodeToModel(res)
-	if err != nil {
-		fmt.Println("解析返回数据失败：", err)
-		return Model.Node{}, err
-	}
-
-	return nodeinfo, nil
-
-}
-
 func GetConnectorNew() ([]Model.ConnectorApi, error) {
+	// 先从缓存获取数据
+	if cachedData, found := Tools.AppCache.Get(Tools.CacheKeyConnector); found {
+		if connectorData, ok := cachedData.([]Model.ConnectorApi); ok {
+			Tools.AppLogger.Debug("从缓存获取Connector信息成功")
+			return connectorData, nil
+		}
+	}
 
-	res, err := Tools.RunCmd(Tools.CliPath, "-o", "json", "connector")
+	// 缓存不存在或已过期，执行命令获取新数据
+	res, err := Tools.RunCmd(Tools.AppConfig.CLI.Path, "-o", "json", "connector")
 	if err != nil {
-		fmt.Println("执行cmd命令失败：", err)
-		return nil, err
+		Tools.AppLogger.Error("执行connector命令失败: %v", err)
+		return nil, fmt.Errorf("获取connector信息失败: %w", err)
 	}
 
 	var ConnectorInfo []Model.Connector
 	err = json.Unmarshal([]byte(res), &ConnectorInfo)
 	if err != nil {
-		fmt.Println("解析json失败：", err)
-		return nil, err
+		Tools.AppLogger.Error("解析connector JSON数据失败: %v, 原始数据: %s", err, res)
+		return nil, fmt.Errorf("解析connector JSON数据失败: %w, 原始数据: %s", err, res)
 	}
 
 	//转为兼容前端的输出
 	var connectorApis []Model.ConnectorApi
 	for _, connector := range ConnectorInfo {
-
 		//定义局部变量和赋值
 		var connectorApi Model.ConnectorApi
 		connectorApi.Url = connector.Url.Url
@@ -141,29 +125,12 @@ func GetConnectorNew() ([]Model.ConnectorApi, error) {
 
 		//拼装到数组
 		connectorApis = append(connectorApis, connectorApi)
-
 	}
+
+	// 将新数据存入缓存
+	Tools.AppCache.Set(Tools.CacheKeyConnector, connectorApis, Tools.GetCacheDuration(Tools.CacheKeyConnector))
+	Tools.AppLogger.Info("获取Connector信息成功")
 
 	return connectorApis, nil
-
-}
-
-// GetConnector 获取服务器连接信息
-func GetConnector() ([]Model.Connector, error) {
-
-	res, err := Tools.RunCmd(Tools.CliPath, "connector")
-	if err != nil {
-		fmt.Println("执行cmd命令失败：", err)
-		return nil, err
-	}
-
-	// 解析表格并转换为 JSON
-	ConnectorInfo, err := Tools.ParseConnectorToModel(res)
-	if err != nil {
-		fmt.Println("解析返回数据失败：", err)
-		return nil, err
-	}
-
-	return ConnectorInfo, nil
 
 }

@@ -1,159 +1,54 @@
 package Tools
 
 import (
-	"EasyTier-Monitor/Model"
-	"encoding/json"
-	"fmt"
+	"net"
 	"strings"
 )
 
-// ParsePeerTableToJSON 节点解析
-func ParsePeerTableToJSON(tableStr string) (string, error) {
-	// 按行分割
-	lines := strings.Split(strings.TrimSpace(tableStr), "\n")
-	if len(lines) < 3 {
-		return "", fmt.Errorf("invalid table format: too few lines")
+// ValidateIPv4 验证并格式化IPv4地址
+func ValidateIPv4(ipStr string) string {
+	ip := net.ParseIP(ipStr)
+	if ip == nil {
+		return ""
 	}
-
-	// 提取表头（第二行，忽略边框）
-	headerLine := strings.TrimSpace(lines[1])
-	// 分割表头并清理首尾空字段
-	headers := strings.Split(headerLine, "│")
-	var cleanHeaders []string
-	for _, h := range headers {
-		h = strings.TrimSpace(h)
-		if h != "" {
-			cleanHeaders = append(cleanHeaders, h)
-		}
+	ipv4 := ip.To4()
+	if ipv4 == nil {
+		return ""
 	}
-	if len(cleanHeaders) < 11 {
-		return "", fmt.Errorf("invalid table format: too few columns (%d)", len(cleanHeaders))
-	}
-
-	// 解析数据行（从第三行到倒数第二行，忽略分隔线和边框）
-	var rows []map[string]string
-	for i := 3; i < len(lines)-1; i++ {
-		if strings.Contains(lines[i], "├") || strings.Contains(lines[i], "└") {
-			continue // 跳过分隔线
-		}
-		fields := strings.Split(strings.TrimSpace(lines[i]), "│")
-		// 清理首尾空字段
-		var cleanFields []string
-		for _, f := range fields {
-			f = strings.TrimSpace(f)
-			if f != "" {
-				cleanFields = append(cleanFields, f)
-			}
-		}
-		if len(cleanFields) != len(cleanHeaders) {
-			continue // 跳过格式错误的行
-		}
-
-		// 创建 map 表示一行
-		row := make(map[string]string)
-		for j, field := range cleanFields {
-			row[cleanHeaders[j]] = field
-		}
-		rows = append(rows, row)
-	}
-
-	// 转换为 JSON
-	jsonData, err := json.MarshalIndent(rows, "", "  ")
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal JSON: %v", err)
-	}
-	return string(jsonData), nil
+	return ipv4.String()
 }
 
-// ParseNodeToModel  node节点解析
-func ParseNodeToModel(output string) (Model.Node, error) {
-	var node Model.Node
-	node.Listeners = []string{} // 初始化 Listeners 切片
-	lines := strings.Split(output, "\n")
-
-	for _, line := range lines {
-		// 跳过分隔线和空行
-		if !strings.Contains(line, "│") || strings.Contains(line, "────") {
-			continue
-		}
-
-		// 分割字段
-		fields := strings.Split(line, "│")
-		if len(fields) < 3 {
-			continue
-		}
-
-		// 清理键和值
-		key := strings.TrimSpace(fields[1])
-		value := strings.TrimSpace(fields[2])
-
-		// 根据键分配值
-		switch {
-		case key == "Virtual IP":
-			node.VirtualIP = value
-		case key == "Hostname":
-			node.Hostname = value
-		case key == "Proxy CIDRs":
-			node.ProxyCIDRs = value
-		case key == "Peer ID":
-			node.PeerID = value
-		case key == "Public IPv4":
-			node.PublicIPv4 = value
-		case key == "UDP Stun Type":
-			node.UDPStunType = value
-		case key == "Interface IPv4":
-			node.InterfaceIPv4 = value
-		case key == "Interface IPv6":
-			node.InterfaceIPv6 = value
-		case strings.HasPrefix(key, "Listener"): // 动态处理所有 Listener
-			node.Listeners = append(node.Listeners, value)
-		}
+// ValidateIPv6 验证并格式化IPv6地址
+func ValidateIPv6(ipStr string) string {
+	ip := net.ParseIP(ipStr)
+	if ip == nil {
+		return ""
 	}
-
-	return node, nil
+	ipv6 := ip.To16()
+	if ipv6 == nil {
+		return ""
+	}
+	return ipv6.String()
 }
 
-// ParseConnectorToModel 获取连接的服务器节点
-func ParseConnectorToModel(output string) ([]Model.Connector, error) {
+// ValidateIPv4List 验证并格式化IPv4地址列表
+func ValidateIPv4List(ipList []string) string {
+	var validIPs []string
+	for _, ipStr := range ipList {
+		if ipv4 := ValidateIPv4(ipStr); ipv4 != "" {
+			validIPs = append(validIPs, ipv4)
+		}
+	}
+	return strings.Join(validIPs, ",")
+}
 
-	//urlRegex := regexp.MustCompile(`url: "([^"]+)"`)
-	//statusRegex := regexp.MustCompile(`status: (\w+),`)
-	//
-	//// 存储提取的结果
-	//var connectors []Model.Connector
-	//
-	//// 按行分割字符串以处理每个 Connector
-	//lines := strings.Split(output, "\n")
-	//var currentUrl, currentStatus string
-	//for _, line := range lines {
-	//	line = strings.TrimSpace(line)
-	//
-	//	// 提取 url
-	//	urlMatches := urlRegex.FindStringSubmatch(line)
-	//	if len(urlMatches) > 1 {
-	//		currentUrl = urlMatches[1]
-	//	}
-	//
-	//	// 提取 status
-	//	statusMatches := statusRegex.FindStringSubmatch(line)
-	//	if len(statusMatches) > 1 {
-	//		currentStatus = statusMatches[1]
-	//	}
-	//
-	//	// 当找到一对 url 和 status 时，添加到结果
-	//	if currentUrl != "" && currentStatus != "" {
-	//		connectors = append(connectors, Model.Connector{
-	//			Url:    currentUrl,
-	//			Status: currentStatus,
-	//		})
-	//		// 重置以处理下一个 Connector
-	//		currentUrl = ""
-	//		currentStatus = ""
-	//	}
-	//}
-
-	//return connectors, nil
-
-	return []Model.Connector{}, nil
-
+// ValidateIPv6List 验证并格式化IPv6地址列表
+func ValidateIPv6List(ipList []string) string {
+	var validIPs []string
+	for _, ipStr := range ipList {
+		if ipv6 := ValidateIPv6(ipStr); ipv6 != "" {
+			validIPs = append(validIPs, ipv6)
+		}
+	}
+	return strings.Join(validIPs, ",")
 }
