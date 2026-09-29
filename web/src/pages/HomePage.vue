@@ -1,19 +1,15 @@
 <template>
   <div class="container">
     <peer-list :peers="peers" :device-count="deviceCount" :last-time="lastTime" v-if="peers.length" @refresh="() => fetchAllData(false)" />
-    <server-connection :connectors="connectors" v-if="connectors.length" />
-    <node-info :node-info="nodeInfo" v-if="nodeInfo" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useMonitorData } from '../composables/useMonitorData';
-import NodeInfo from '../components/NodeInfo.vue';
-import ServerConnection from '../components/ServerConnection.vue';
 import PeerList from '../components/PeerList.vue';
 
 const {
-  nodeInfo, connectors, peers, deviceCount, lastTime, fetchAllData
+  peers, deviceCount, lastTime, fetchAllData
 } = useMonitorData();
 </script>
 

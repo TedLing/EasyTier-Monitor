@@ -2,7 +2,7 @@ import { ref, onMounted } from 'vue';
 import { ElLoading } from 'element-plus';
 import { get } from './useApi';
 import { API_ENDPOINTS } from '../config/api';
-import type { NodeInfo, Connector, Peer } from '../types';
+import type { Peer } from '../types';
 
 // 获取当前时间的格式化函数
 const formatCurrentTime = (): string => {
@@ -18,27 +18,12 @@ const formatCurrentTime = (): string => {
 };
 
 export const useMonitorData = () => {
-  console.log('当前版本是新版本');
   // 状态管理
-  const nodeInfo = ref<NodeInfo | null>(null);
-  const connectors = ref<Connector[]>([]);
   const peers = ref<Peer[]>([]);
   const deviceCount = ref(0);
   const lastTime = ref<string | null>(null);
   const loadingInstance = ref<any>(null);
   const isInitialLoad = ref(true);
-
-  // 获取节点信息
-  const fetchNodeInfo = async () => {
-    const data = await get<NodeInfo>(API_ENDPOINTS.NODE);
-    nodeInfo.value = data;
-  };
-
-  // 获取服务器连接信息
-  const fetchConnectors = async () => {
-    const data = await get<Connector[]>(API_ENDPOINTS.CONNECTOR);
-    connectors.value = data || [];
-  };
 
   // 获取对等节点信息
   const fetchPeers = async () => {
@@ -59,7 +44,7 @@ export const useMonitorData = () => {
     }
 
     try {
-      await Promise.all([fetchNodeInfo(), fetchConnectors(), fetchPeers()]);
+      await fetchPeers();
     } finally {
       if (loadingInstance.value) {
         loadingInstance.value.close();
@@ -76,15 +61,11 @@ export const useMonitorData = () => {
 
   return {
     // 状态
-    nodeInfo,
-    connectors,
     peers,
     deviceCount,
     lastTime,
     // 方法
     fetchAllData,
-    fetchNodeInfo,
-    fetchConnectors,
     fetchPeers,
   };
 };
