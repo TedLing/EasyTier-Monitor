@@ -16,3 +16,9 @@ HELP.md
 
 ### VS Code ###
 .vscode/
+
+### 前端 ###
+web/node_modules
+web/dist
+web/tsconfig.tsbuildinfo
+
