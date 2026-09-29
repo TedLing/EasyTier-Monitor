@@ -20,6 +20,8 @@ type Config struct {
 	// CLI配置
 	CLI struct {
 		Path       string `yaml:"path"`
+		Host       string `yaml:"host"` // easytier-core 管理地址
+		Port       int    `yaml:"port"` // easytier-core 管理端口
 		Timeout    int    `yaml:"timeout"`
 		MaxRetries int    `yaml:"max_retries"`
 	} `yaml:"cli"`
@@ -98,6 +100,8 @@ func SetDefaultConfig() {
 
 	// CLI默认配置
 	AppConfig.CLI.Path = "easytier"
+	AppConfig.CLI.Host = "127.0.0.1"
+	AppConfig.CLI.Port = 15888
 	AppConfig.CLI.Timeout = 5
 	AppConfig.CLI.MaxRetries = 3
 
@@ -137,6 +141,14 @@ func loadEnvOverrides() {
 	// CLI配置
 	if path, exists := os.LookupEnv("EASYTIER_MONITOR_CLI_PATH"); exists {
 		AppConfig.CLI.Path = path
+	}
+	if host, exists := os.LookupEnv("EASYTIER_MONITOR_CLI_HOST"); exists {
+		AppConfig.CLI.Host = host
+	}
+	if port, exists := os.LookupEnv("EASYTIER_MONITOR_CLI_PORT"); exists {
+		if p, err := strconv.Atoi(port); err == nil {
+			AppConfig.CLI.Port = p
+		}
 	}
 	if timeout, exists := os.LookupEnv("EASYTIER_MONITOR_CLI_TIMEOUT"); exists {
 		if t, err := strconv.Atoi(timeout); err == nil {

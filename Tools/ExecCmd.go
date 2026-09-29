@@ -52,6 +52,12 @@ func IsSafeArgs(args []string) bool {
 	return true
 }
 
+// CLIArgs 构造 easytier-cli 公共参数（含 core 管理地址），追加业务参数后返回完整参数
+func CLIArgs(args ...string) []string {
+	params := []string{"-p", fmt.Sprintf("%s:%d", AppConfig.CLI.Host, AppConfig.CLI.Port)}
+	return append(params, args...)
+}
+
 // RunCmd 执行外部命令，带详细错误信息和安全检查
 func RunCmd(cmdStr string, params ...string) (string, error) {
 	// 1. 基本安全检查：命令路径不包含危险字符
@@ -123,5 +129,41 @@ func RunCmd(cmdStr string, params ...string) (string, error) {
 		}
 	}
 
+	return out.String(), nil
+}
+
+// RunCmdCombined 执行外部命令，合并 stdout 与 stderr 返回。
+// easytier-cli 常以非零退出码配合错误文本表示业务错误，因此不因退出码非零而丢弃输出。
+func RunCmdCombined(cmdStr string, params ...string) (string, error) {
+	if !IsSafeCommandPath(cmdStr) {
+		return "", fmt.Errorf("命令路径包含危险字符: %s", cmdStr)
+	}
+	if !IsSafeArgs(params) {
+		return "", fmt.Errorf("命令参数包含危险模式: %v", params)
+	}
+
+	cmdPath, err := exec.LookPath(cmdStr)
+	if err != nil {
+		return "", fmt.Errorf("找不到命令 '%s': %v", cmdStr, err)
+	}
+	if !filepath.IsAbs(cmdPath) {
+		if p, e := filepath.Abs(cmdPath); e == nil {
+			cmdPath = p
+		}
+	}
+
+	cmd := exec.Command(cmdPath, params...)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	cmd.Env = []string{}
+	cmd.Dir = "."
+
+	if e := cmd.Run(); e != nil {
+		// 非零退出码不视为执行错误，CLI 的错误信息已包含在合并输出中
+		if _, ok := e.(*exec.ExitError); !ok {
+			return out.String(), e
+		}
+	}
 	return out.String(), nil
 }

@@ -8,4 +8,6 @@ export const API_ENDPOINTS = {
   NODE: `${API_BASE_URL}/node`,
   CONNECTOR: `${API_BASE_URL}/connector`,
   PEER: `${API_BASE_URL}/peer`,
+  STATUS: `${API_BASE_URL}/status`,
+  CONNECTION: `${API_BASE_URL}/connection`,
 };

@@ -24,6 +24,37 @@ export interface Connector {
   status: string;
 }
 
+// 状态页聚合数据接口
+export interface Status {
+  running: boolean;
+  version: string;
+  hostname: string;
+  virtual_ip: string;
+  proxy_cidrs: string[];
+  listeners: string[];
+  peer_count: number;
+  total_rx: number;
+  total_tx: number;
+  connector: number;
+}
+
+// 连接信息页聚合数据接口（各字段为 CLI 子命令原始文本）
+export interface ConnectionInfo {
+  node: string;
+  peer: string;
+  route: string;
+  connector: string;
+  stun: string;
+  peer_center: string;
+  vpn_portal: string;
+  proxy: string;
+  acl: string;
+  mapped_listener: string;
+  stats: string;
+  cmdline: string;
+  config_file: string;
+}
+
 // 对等节点信息接口
 export interface Peer {
   id: string;

@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -64,6 +65,36 @@ func GetRouter(content embed.FS) *gin.Engine {
 			return
 		}
 		c.JSON(http.StatusOK, Tools.GetSuccMsg(1, data))
+	})
+
+	//获取状态页聚合数据
+	apiGroup.GET("/status", func(c *gin.Context) {
+		data, err := Service.GetStatus()
+		if err != nil {
+			c.JSON(http.StatusOK, Tools.GetFailMsg(err.Error()))
+			return
+		}
+		c.JSON(http.StatusOK, Tools.GetSuccMsg(1, data))
+	})
+
+	//获取连接信息聚合数据
+	apiGroup.GET("/connection", func(c *gin.Context) {
+		data, err := Service.GetConnection()
+		if err != nil {
+			c.JSON(http.StatusOK, Tools.GetFailMsg(err.Error()))
+			return
+		}
+		c.JSON(http.StatusOK, Tools.GetSuccMsg(1, data))
+	})
+
+	// SPA history 模式：未知的非接口、非静态请求统一返回 index.html
+	r.NoRoute(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		if strings.HasPrefix(path, "/api/") || strings.HasPrefix(path, "/static/") {
+			c.JSON(http.StatusNotFound, Tools.GetFailMsg("资源不存在"))
+			return
+		}
+		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
 	return r

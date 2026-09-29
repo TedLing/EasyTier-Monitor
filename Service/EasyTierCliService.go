@@ -19,7 +19,7 @@ func GetPeerNew() ([]Model.Peer, error) {
 	}
 
 	// 缓存不存在或已过期，执行命令获取新数据
-	res, err := Tools.RunCmd(Tools.AppConfig.CLI.Path, "-o", "json", "peer")
+	res, err := Tools.RunCmd(Tools.AppConfig.CLI.Path, Tools.CLIArgs("-o", "json", "peer")...)
 	if err != nil {
 		Tools.AppLogger.Error("执行peer命令失败: %v", err)
 		return nil, fmt.Errorf("获取peer信息失败: %w", err)
@@ -51,7 +51,7 @@ func GetNodeNew() (Model.Node, error) {
 	}
 
 	// 缓存不存在或已过期，执行命令获取新数据
-	res, err := Tools.RunCmd(Tools.AppConfig.CLI.Path, "-o", "json", "node")
+	res, err := Tools.RunCmd(Tools.AppConfig.CLI.Path, Tools.CLIArgs("-o", "json", "node")...)
 	if err != nil {
 		Tools.AppLogger.Error("执行node命令失败: %v", err)
 		return Model.Node{}, fmt.Errorf("获取node信息失败: %w", err)
@@ -93,7 +93,7 @@ func GetConnectorNew() ([]Model.ConnectorApi, error) {
 	}
 
 	// 缓存不存在或已过期，执行命令获取新数据
-	res, err := Tools.RunCmd(Tools.AppConfig.CLI.Path, "-o", "json", "connector")
+	res, err := Tools.RunCmd(Tools.AppConfig.CLI.Path, Tools.CLIArgs("-o", "json", "connector")...)
 	if err != nil {
 		Tools.AppLogger.Error("执行connector命令失败: %v", err)
 		return nil, fmt.Errorf("获取connector信息失败: %w", err)

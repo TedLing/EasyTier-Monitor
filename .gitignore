@@ -22,3 +22,6 @@ web/node_modules
 web/dist
 web/tsconfig.tsbuildinfo
 
+### 官方插件参考（仅本地，不入库） ###
+luci-app-easytier/
+
