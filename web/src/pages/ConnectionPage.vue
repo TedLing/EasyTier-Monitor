@@ -3,14 +3,17 @@
     <div class="et-conninfo-container">
       <div class="et-conninfo-header">
         <div class="et-conninfo-title">连接信息</div>
-        <button class="et-refresh-btn" :class="{ loading: isRefreshing }" :disabled="isRefreshing"
-          @click="refreshConnInfo">
-          <svg class="et-refresh-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2">
-            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
-          </svg>
-          <span>{{ isRefreshing ? '刷新中...' : '刷新' }}</span>
-        </button>
+        <div class="et-conninfo-actions">
+          <auto-refresh @refresh="refreshConnInfo" />
+          <button class="et-refresh-btn" :class="{ loading: isRefreshing }" :disabled="isRefreshing"
+            @click="refreshConnInfo">
+            <svg class="et-refresh-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+            </svg>
+            <span>{{ isRefreshing ? '刷新中...' : '刷新' }}</span>
+          </button>
+        </div>
       </div>
 
       <div class="et-tabs-container">
@@ -31,10 +34,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
+import AutoRefresh from '../components/AutoRefresh.vue';
 import { API_ENDPOINTS } from '../config/api';
 import type { ConnectionInfo, ApiResponse } from '../types';
-
-const POLL_INTERVAL = 5000;
 
 const tabs = [
   { id: 'node', label: '节点信息', key: 'node' },
@@ -57,7 +59,6 @@ type InfoKey = typeof tabs[number]['key'];
 const data = ref<ConnectionInfo | null>(null);
 const currentTab = ref<TabId>('node');
 const isRefreshing = ref(false);
-let timer: number | undefined;
 
 const idToKey: Record<TabId, InfoKey> = tabs.reduce((acc, t) => {
   acc[t.id] = t.key;
@@ -448,17 +449,12 @@ async function refreshConnInfo() {
 
 onMounted(() => {
   document.addEventListener('click', handleCopyClick);
+  // 首次加载；后续定时刷新由 AutoRefresh 开关控制
   refreshConnInfo();
-  timer = window.setInterval(async () => {
-    if (isRefreshing.value) return;
-    const d = await fetchConnection();
-    if (d) data.value = d;
-  }, POLL_INTERVAL);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleCopyClick);
-  if (timer) window.clearInterval(timer);
 });
 </script>
 
@@ -491,6 +487,18 @@ onUnmounted(() => {
 .et-conninfo-title {
   font-size: 16px;
   font-weight: 600;
+  color: #2c3e50;
+}
+
+.et-conninfo-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.et-conninfo-actions .refresh-text {
+  font-size: 14px;
+  font-weight: 500;
   color: #2c3e50;
 }
 
@@ -712,6 +720,7 @@ onUnmounted(() => {
 
   .et-conninfo-header { border-bottom-color: #34495e; }
   .et-conninfo-title { color: #ecf0f1; }
+  .et-conninfo-actions .refresh-text { color: #ecf0f1; }
   .et-tabs-container { border-bottom-color: #34495e; }
   .et-tabs-container::-webkit-scrollbar-track { background: #34495e; }
 

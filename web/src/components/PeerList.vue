@@ -1,7 +1,11 @@
 <template>
   <div>
     <div class="header-container">
-      <h3>全部节点信息</h3>
+      <div class="header-left">
+        <h3>全部节点信息</h3>
+        <span class="device-count">当前连接设备数[ <strong>{{ deviceCount }}</strong> ]个</span>
+        <span class="last-date">最后刷新时间[ <strong>{{ lastTime }}</strong> ]</span>
+      </div>
       <div class="auto-refresh-container">
         <auto-refresh @refresh="handleRefresh" />
       </div>
@@ -51,11 +55,6 @@
       </el-table-column>
       <el-table-column prop="version" label="内核版本" align="center" sortable width="120" />
     </el-table>
-
-    <div class="mt-4 flex items-center">
-      <span class="device-count">当前连接设备数[ <strong>{{ deviceCount }}</strong> ]个</span>
-      <span class="last-date ml-4">最后刷新时间[ <strong>{{ lastTime }}</strong> ]</span>
-    </div>
   </div>
 </template>
 
@@ -142,8 +141,13 @@ const copyData = async (ipv4) => {
   margin-bottom: 16px;
 }
 
-.header-container h3 {
-  margin: 0;
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-left h3 {
+  margin: 0 24px 0 0;
 }
 
 .header-container .auto-refresh-container {
@@ -152,6 +156,7 @@ const copyData = async (ipv4) => {
 
 .device-count {
   font-size: 18px;
+  margin-right: 24px;
 }
 
 .last-date {

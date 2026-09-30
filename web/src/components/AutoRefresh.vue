@@ -19,11 +19,12 @@ let refreshTimer = null;
 
 const REFRESH_INTERVAL = 10000; // 10秒刷新间隔
 
-const startRefresh = () => {
+// 启动定时刷新；immediate 为 true 时先立即刷新一次
+const startRefresh = (immediate = true) => {
   if (refreshTimer) return;
-  
-  // 立即刷新一次，然后再开始定时刷新
-  emit('refresh');
+
+  // 手动开启时立即刷新一次，然后再开始定时刷新
+  if (immediate) emit('refresh');
   refreshTimer = window.setInterval(() => {
     emit('refresh');
   }, REFRESH_INTERVAL);
@@ -70,6 +71,10 @@ onMounted(() => {
   document.addEventListener('visibilitychange', handleVisibilityChange);
   window.addEventListener('blur', handleWindowBlur);
   window.addEventListener('focus', handleWindowFocus);
+  // 默认开启：挂载即开始定时刷新（首次数据由页面自身加载，这里不重复触发）
+  if (autoRefresh.value) {
+    startRefresh(false);
+  }
 });
 
 onUnmounted(() => {
